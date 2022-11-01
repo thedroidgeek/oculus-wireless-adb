@@ -11,3 +11,5 @@ adb install app-debug.apk
 adb shell pm grant tdg.oculuswirelessadb android.permission.WRITE_SECURE_SETTINGS
 adb shell pm grant tdg.oculuswirelessadb android.permission.READ_LOGS
 ```
+
+After ADB wireless is enabled, [a script](script/) can be used to automatically discover and connect to it with the help of the mDNS protocol.
