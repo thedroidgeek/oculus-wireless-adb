@@ -1,4 +1,5 @@
-from os import system, _exit
+from os import _exit
+from subprocess import Popen
 from zeroconf import ServiceBrowser, ServiceListener, Zeroconf
 
 class MyListener(ServiceListener):
@@ -7,7 +8,7 @@ class MyListener(ServiceListener):
         ip_bytes = info.addresses[0]
         ip_str = f"{ip_bytes[0]}.{ip_bytes[1]}.{ip_bytes[2]}.{ip_bytes[3]}"
         print(f"\nFound: {ip_str}:{info.port}")
-        system(f"adb connect {ip_str}:{info.port}")
+        Popen(['adb', 'connect', f"{ip_str}:{info.port}"]).wait()
         zeroconf.close()
         _exit(0)
 
