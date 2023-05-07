@@ -35,7 +35,7 @@ ServiceBrowser(zeroconf, "_adb-tls-connect._tcp.local.", listener)
 ServiceBrowser(zeroconf, "_adb_secure_connect._tcp.local.", listener)
 
 try:
-    input("Waiting for a device, press Enter to abort...")
+    input("Waiting for a device, press Enter to abort...\n")
 except KeyboardInterrupt:
     pass
 finally:
