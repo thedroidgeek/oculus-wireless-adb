@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
                     this@MainActivity.runOnUiThread {
                         val builder = AlertDialog.Builder(this)
                         builder.setTitle("Permission required")
-                        builder.setMessage("The ${permission.split('.').last()} permission is required in order to properly enable wireless ADB - run the following adb command from a computer to enable it:\n\nadb pm grant ${applicationContext.getPackageName()} ${permission}")
+                        builder.setMessage("The ${permission.split('.').last()} permission is required in order to properly enable wireless ADB - run the following adb command from a computer to enable it:\n\nadb shell pm grant ${applicationContext.getPackageName()} ${permission}")
                         builder.setCancelable(false)
                         builder.setPositiveButton(android.R.string.yes) { _, _ -> finish() }
                         builder.show()
