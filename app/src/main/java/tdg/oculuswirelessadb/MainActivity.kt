@@ -2,12 +2,18 @@ package tdg.oculuswirelessadb
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import java.io.IOException
@@ -51,6 +57,24 @@ class MainActivity : AppCompatActivity() {
                     if (isChecked) 1 else 0
                 )
                 updateAdbStatus()
+            }
+
+            textView!!.setOnLongClickListener {
+                if (switch!!.isChecked)
+                {
+                    val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clipData = ClipData.newPlainText("text", "adb connect 127.0.0.1:${textView!!.text.split(':').last()}")
+                    clipboardManager.setPrimaryClip(clipData)
+
+                    val toast: Toast = Toast.makeText(this, "ADB connect command was copied to clipboard", Toast.LENGTH_LONG)
+                    val v = toast.view!!.findViewById<View>(android.R.id.message) as TextView
+                    v.setTextColor(Color.BLACK) // workaround for dark mode bug
+                    toast.show()
+
+                    val launchIntent = packageManager.getLaunchIntentForPackage("com.termux")
+                    launchIntent?.let { startActivity(it) }
+                }
+                return@setOnLongClickListener true
             }
 
         }).start()
