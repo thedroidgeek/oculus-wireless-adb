@@ -1,5 +1,5 @@
 # oculus-wireless-adb
-An app that enables wireless ADB from within a Quest 2 device.
+An app that enables wireless ADB from within a Quest 2/Quest Pro VR headset.
 
 This is done through the Android global settings provider (requires manually granting `WRITE_SECURE_SETTINGS`).
 
