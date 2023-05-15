@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Oculus Wireless ADB</string>
+    <string name="credits">made with ❤️ by <a href="https://github.com/thedroidgeek">@thedroidgeek</a></string>
+    <string name="tcpip_mode_steps">In order to enable this mode for the first time, it is necessary to run \'adb tcpip 5555\' from a computer, with the Quest headset plugged in via USB.\n\nOnce that\'s done, you can try enabling ADB from this app with tcpip mode checked, this should prompt you to allow the connection.\n\nMake sure you select \'always allow\', so that you don\'t have to repeat this process next time.</string>
 </resources>

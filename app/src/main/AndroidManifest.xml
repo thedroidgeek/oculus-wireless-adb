@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="tdg.oculuswirelessadb">
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- required to enable ADB wifi -->
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
+
+    <!-- required to read the port from logcat output -->
     <uses-permission android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
+
+    <!-- required to read the LAN IP address -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- required to open socket connections -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <queries>
         <package android:name="com.termux" />
