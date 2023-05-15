@@ -13,3 +13,7 @@ adb shell pm grant tdg.oculuswirelessadb android.permission.READ_LOGS
 ```
 
 After ADB wireless is enabled, [a script](script/) can be used to automatically discover and connect to it with the help of the mDNS protocol.
+
+This app now also has a `tcpip` mode, which allows unauthorized/insecure connections to come through - this however needs a computer to set up for the first time, so that the embedded ADB client can be authorized so that it can enable the mode by itself in the future.
+
+This can be achieved by running the command `adb tcpip 5555` from a computer, then activating ADB from within the app, with the tcpip mode option checked.
