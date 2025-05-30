@@ -6,7 +6,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.provider.Settings
@@ -261,12 +260,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showToast(text: String) {
-        val toast: Toast = Toast.makeText(this, text, Toast.LENGTH_LONG)
-        if (toast.view != null) {
-            val v = toast.view!!.findViewById<View>(android.R.id.message) as TextView
-            v.setTextColor(Color.BLACK) // workaround for dark mode bug
-        }
-        toast.show()
+        Toast.makeText(this, text, Toast.LENGTH_LONG).show()
     }
 
     private fun getLanIp(): String? {
