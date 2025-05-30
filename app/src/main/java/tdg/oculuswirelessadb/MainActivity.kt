@@ -6,7 +6,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.provider.Settings
 import android.text.method.LinkMovementMethod
@@ -22,8 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.Exception
-import java.math.BigInteger
-import java.net.InetAddress
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -234,9 +231,11 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun checkAdbConnection(port: Int): Boolean {
-        if ("$mAdbPath connect 127.0.0.1:$port".runCommand()?.contains("connected") == true) {
-            val lanIp = getLanIp()
-            runOnUiThread { adbStatusTextView?.text = "$lanIp:$mAdbPort\n$lanIp:5555" }
+        var host = mAdbHost
+        if (port == 5555) {
+            host = "127.0.0.1"
+        }
+        if ("$mAdbPath connect $host:$port".runCommand()?.contains("connected") == true) {
             return true
         }
         return false
@@ -278,17 +277,5 @@ class MainActivity : AppCompatActivity() {
 
     private fun showToast(text: String) {
         Toast.makeText(this, text, Toast.LENGTH_LONG).show()
-    }
-
-    private fun getLanIp(): String? {
-        return try {
-            val wm = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
-            val longIp = wm.connectionInfo.ipAddress.toLong()
-            val byteIp = BigInteger.valueOf(longIp).toByteArray().reversedArray()
-            InetAddress.getByAddress(byteIp).hostAddress
-        }
-        catch (e: Exception) {
-            "127.0.0.1"
-        }
     }
 }
