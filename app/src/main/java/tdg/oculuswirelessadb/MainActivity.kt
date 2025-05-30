@@ -243,6 +243,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun String.runCommand(): String? {
+        Log.d("OW-ADB", "Running command: adb ${this.substringAfter(" ")}")
         try {
             val parts = this.split("\\s".toRegex())
             val procbuild = ProcessBuilder(*parts.toTypedArray())
@@ -253,7 +254,9 @@ class MainActivity : AppCompatActivity() {
                 put("HOME", filesDir.path)
                 put("TMPDIR", cacheDir.path)
             }
-            return procbuild.start().inputStream.bufferedReader().readText()
+            val output = procbuild.start().inputStream.bufferedReader().readText()
+            Log.d("OW-ADB", "Output: $output")
+            return output
         } catch(e: Exception) {
             e.printStackTrace()
             return null
