@@ -10,13 +10,17 @@ import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.provider.Settings
 import android.text.method.LinkMovementMethod
-import android.view.View
+import android.util.Log
 import android.widget.Switch
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.Exception
 import java.math.BigInteger
 import java.net.InetAddress
@@ -32,8 +36,10 @@ class MainActivity : AppCompatActivity() {
     private var activationSwitch: Switch? = null
     private var tcpipModeCheckBox: CheckBox? = null
     private var adbStatusTextView: TextView? = null
+    private var adbDiscovery: JmDNSAdbDiscovery? = null
 
     private var mAdbPort: Int = 0
+    private var mAdbHost = "127.0.0.1"
     private var mAdbPath = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +52,8 @@ class MainActivity : AppCompatActivity() {
         adbStatusTextView = findViewById(R.id.textview1)
 
         mAdbPath = "${applicationInfo.nativeLibraryDir}/libadb.so"
+
+        adbDiscovery = JmDNSAdbDiscovery(applicationContext)
 
         findViewById<TextView>(R.id.creditsTextView).movementMethod = LinkMovementMethod.getInstance()
 
@@ -162,51 +170,57 @@ class MainActivity : AppCompatActivity() {
 
         if (adbWifiEnabled == 1)
         {
-            runOnUiThread { activationSwitch?.isChecked = true }
+            runOnUiThread {
+                activationSwitch?.isChecked = true
+                activationSwitch?.isEnabled = false
+                adbStatusTextView?.text = "..."
+            }
 
-            // parse ADB wifi port from logcat
-            val inputString = "logcat -d -s adbd -e adbwifi*".runCommand()
-            if (!inputString.isNullOrEmpty())
-            {
-                val regex = Regex("adbwifi started on port (\\d+)")
-                val matches = regex.findAll(inputString)
-                if (matches.count() > 0)
+            CoroutineScope(Dispatchers.Main).launch {
+                val result = withContext(Dispatchers.IO) {
+                    adbDiscovery?.discoverLocalAdbService()
+                }
+
+                if (result != null) {
+                    mAdbHost = result.first
+                    mAdbPort = result.second
+                    runOnUiThread { adbStatusTextView?.text = "$mAdbHost:$mAdbPort" }
+                }
+
+                runOnUiThread { activationSwitch?.isEnabled = true }
+
+                // enable handle tcpip mode
+                if (tcpipModeCheckBox!!.isChecked)
                 {
-                    mAdbPort = matches.last().groupValues[1].toInt()
-                    runOnUiThread { adbStatusTextView?.text = "${getLanIp()}:$mAdbPort" }
+                    // initial tcpip connection check
+                    if (checkAdbConnection(5555)) {
+                        runOnUiThread { adbStatusTextView?.text = "$mAdbHost:$mAdbPort\n$mAdbHost:5555" }
+                        return@launch
+                    }
+
+                    // ADB wifi connection check
+                    if (!checkAdbConnection(mAdbPort)) {
+                        runOnUiThread { showToast("Please run 'adb tcpip 5555' from a computer and try again") }
+                        return@launch
+                    }
+
+                    // if we're connected, try to activate tcpip mode
+                    if ("$mAdbPath -s $mAdbHost:$mAdbPort tcpip 5555".runCommand()?.contains("restarting") == false) {
+                        runOnUiThread { showToast("Unexpected output when trying to enable tcpip mode") }
+                        return@launch
+                    }
+
+                    // delay for ADB server restart
+                    Thread.sleep(2_000)
+
+                    // second tcpip mode check
+                    if (checkAdbConnection(5555)) {
+                        runOnUiThread { adbStatusTextView?.text = "$mAdbHost:$mAdbPort\n$mAdbHost:5555" }
+                        return@launch
+                    } else {
+                        runOnUiThread { showToast("Failed to check tcpip mode activation") }
+                    }
                 }
-                else {
-                    runOnUiThread { showToast("Failed to obtain ADB wifi port") }
-                    return@withLock
-                }
-            }
-            else {
-                runOnUiThread { showToast("Failed to get logcat output") }
-                return@withLock
-            }
-
-            // enable handle tcpip mode
-            if (tcpipModeCheckBox!!.isChecked)
-            {
-                // initial tcpip connection check
-                if (checkAdbConnection(5555))
-                    return@withLock
-
-                // ADB wifi connection check
-                if (!checkAdbConnection(mAdbPort)) {
-                    runOnUiThread { showToast("Please run 'adb tcpip 5555' from a computer and try again") }
-                    return@withLock
-                }
-
-                // if we're connected, try to activate tcpip mode
-                "$mAdbPath -s 127.0.0.1:$mAdbPort tcpip 5555".runCommand()
-
-                // delay for ADB server restart
-                Thread.sleep(2_000)
-
-                // second tcpip mode check
-                if (checkAdbConnection(5555))
-                    return@withLock
             }
         }
         else
