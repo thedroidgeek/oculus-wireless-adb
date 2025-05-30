@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.creditsTextView).movementMethod = LinkMovementMethod.getInstance()
 
 
-        for (permission in listOf(Manifest.permission.WRITE_SECURE_SETTINGS, Manifest.permission.READ_LOGS)) {
+        for (permission in listOf(Manifest.permission.WRITE_SECURE_SETTINGS)) {
             if (applicationContext.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 runOnUiThread {
                     showDialog("Permission required", "The ${permission.split('.').last()} permission is required in order to properly enable wireless ADB - " +
